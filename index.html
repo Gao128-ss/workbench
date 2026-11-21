@@ -16,7 +16,7 @@ header{padding:14px 18px 10px;display:flex;align-items:center;gap:12px;backgroun
 #avatarEmoji{line-height:1;}
 #avatarImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;}
 .hd-mid{flex:1;min-width:0;}
-#greet{font-size:17px;font-weight:800;}
+#greet{font-size:16px;font-weight:800;line-height:1.25;}
 #hdDate{font-size:12px;color:var(--sub);margin-top:2px;}
 .hbtn{width:36px;height:36px;border-radius:50%;background:#fff;border:1.5px solid var(--border);color:var(--sub);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0;font-family:inherit;}
 main{flex:1;overflow-y:auto;padding:6px 16px 20px;scrollbar-width:none;}
@@ -74,9 +74,23 @@ nav .tab svg{width:22px;height:22px;}
 .led-amt{font-weight:900;font-size:15px;flex-shrink:0;white-space:nowrap;}
 .date-sep{font-size:12px;color:var(--sub);font-weight:800;margin:12px 2px 7px;}
 .bar-row{margin-bottom:9px;}
+.bar-row.clk{cursor:pointer;}
+.bar-row.clk:active{opacity:.65;}
 .bar-lbl{display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:3px;}
 .bar-track{height:10px;background:var(--border);border-radius:999px;overflow:hidden;}
 .bar-fill{height:100%;border-radius:999px;transition:width .3s;}
+.cat-detail{background:#FFFEFC;border:1.5px solid var(--border);border-radius:12px;padding:4px 10px;margin:-2px 0 11px;}
+.cd-row{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:6px 0;border-bottom:1px dashed var(--border);}
+.cd-row:last-child{border-bottom:none;}
+.cd-row span:first-child{color:var(--sub);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.mcell{aspect-ratio:1/1.05;background:#fff;border:1.5px solid var(--border);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer;padding:2px;}
+.mcell .md{font-size:12px;font-weight:700;line-height:1;}
+.mcell .me{font-size:14px;line-height:1.1;}
+.mcell.today{border-color:var(--pink);background:#FFF0F3;}
+.mcell.sel{background:var(--mint);border-color:var(--avo);}
+.mchip{display:inline-block;font-size:11px;font-weight:800;background:#FFF7F0;border:1.5px solid var(--border);border-radius:999px;padding:3px 9px;}
+.mood-sum{background:#FFF7F5;border:1.5px dashed var(--pink);border-radius:14px;padding:12px;font-size:13px;line-height:1.75;color:var(--text);}
 .mood-grid{display:flex;flex-wrap:wrap;gap:8px;}
 .mood-it{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;border:2px solid transparent;background:#FFFEFC;}
 .mood-it.on{border-color:var(--pink);background:#FFF0F3;transform:scale(1.08);}
@@ -168,6 +182,7 @@ audio{width:100%;height:36px;margin-top:7px;}
         </div>
         <div style="margin-top:8px" class="sum2"><div class="sum-box" style="background:#FFF3E8"><div class="lbl">本月结余</div><div class="val" id="lsBal" style="color:var(--orange)">¥0</div></div><div class="sum-box" style="background:#F5F0EA"><div class="lbl">记账笔数</div><div class="val" id="lsCnt" style="color:var(--sub)">0</div></div></div>
         <div id="lsBars" style="margin-top:12px"></div>
+        <div class="legend" style="margin-top:4px">点任意分类，展开该分类明细（金额从高到低）</div>
       </div>
       <div class="sum2">
         <div class="sum-box" style="background:#FFECEF"><div class="lbl">总收入</div><div class="val" style="color:#E8607C" id="sumIn">¥0</div></div>
@@ -183,12 +198,30 @@ audio{width:100%;height:36px;margin-top:7px;}
       <div class="card"><h3>📖 全部收支明细</h3><div id="ledList"></div></div>
     </section>
     <section class="view" id="v-mood">
+      <div class="card">
+        <div class="cal-head">
+          <button class="cal-nav" id="mPrev">◀</button>
+          <div class="cal-title" id="mTitle" style="font-size:15px"></div>
+          <button class="cal-nav" id="mNext">▶</button>
+        </div>
+        <div class="dow"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+        <div id="mGrid" class="mgrid"></div>
+        <div class="legend">格子里是当天的心情，点某天只看那天的记录（也能补记）</div>
+      </div>
+      <div class="card">
+        <div class="cal-head" style="margin-bottom:4px">
+          <button class="cal-nav" id="mwPrev">◀</button>
+          <div class="cal-title" id="mwTitle" style="font-size:15px"></div>
+          <button class="cal-nav" id="mwNext">▶</button>
+        </div>
+        <div id="mwBody"></div>
+      </div>
       <div class="card"><h3>🌤 今天心情怎么样？</h3>
         <div class="mood-grid" id="moodGrid"></div>
         <textarea id="moodTxt" rows="3" placeholder="写点什么吧…（可以不写）" style="margin-top:12px"></textarea>
         <div class="row" style="margin-top:10px"><input type="date" id="moodDate" style="flex:1"><button class="btn" id="addMood">记录此刻</button></div>
       </div>
-      <div class="card"><h3>📔 心情日记</h3><div id="moodList"></div></div>
+      <div class="card"><h3>📔 心情日记</h3><div id="moodFilterBar"></div><div id="moodList"></div></div>
     </section>
     <section class="view" id="v-idea">
       <div class="card"><h3>💡 记一个灵感</h3>
@@ -259,14 +292,25 @@ function $(id){return document.getElementById(id);}
 function showToast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('on');},2600);}
 function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 var now0=new Date();
-var state={view:'v-plan',planView:'cal',calY:now0.getFullYear(),calM:now0.getMonth(),curDate:today(),ledType:'expense',ledCat:'餐饮',mood:'开心',fitDate:today(),lsY:now0.getFullYear(),lsM:now0.getMonth()};
+var state={view:'v-plan',planView:'cal',calY:now0.getFullYear(),calM:now0.getMonth(),curDate:today(),ledType:'expense',ledCat:'餐饮',mood:'开心',fitDate:today(),lsY:now0.getFullYear(),lsM:now0.getMonth(),openCat:'',moodY:now0.getFullYear(),moodM:now0.getMonth(),moodWkOff:0,moodFilter:''};
 var PT={'普通':{bg:'#EFFAE3',c:'#6B9A3C'},'重要':{bg:'#FFF3E0',c:'#C77800'},'紧急':{bg:'#FFE4E4',c:'#D64545'}};
 var CATS={expense:['餐饮','交通','购物','医疗','宠物','日用品','其他'],income:['工资','其他']};
 var EMO={'餐饮':'🍜','交通':'🚌','购物':'🛍','医疗':'💊','宠物':'🐶','日用品':'🧴','其他':'📦','工资':'💰'};
 var MOODS=[{n:'开心',e:'😄'},{n:'平静',e:'🙂'},{n:'一般',e:'😐'},{n:'疲惫',e:'😪'},{n:'焦虑',e:'😟'},{n:'难过',e:'😢'},{n:'沮丧',e:'😞'}];
 var BARC=['#FF9FB3','#B8E6A8','#FFD8A8','#C9E2F5','#E3DDF5','#FFE0CE','#D4EFC9'];
 function moodE(n){for(var i=0;i<MOODS.length;i++)if(MOODS[i].n===n)return MOODS[i].e;return '🙂';}
-(function(){var h=now0.getHours();var g=h<6?'夜深了':h<9?'早上好':h<12?'上午好':h<14?'中午好':h<18?'下午好':'晚上好';$('greet').textContent=g+'，今天也要元气满满 🌱';$('hdDate').textContent=now0.getFullYear()+'年'+(now0.getMonth()+1)+'月'+now0.getDate()+'日 星期'+WEEK[now0.getDay()];})();
+/* ---- 随机问候语 ---- */
+var GREET={
+dawn:['夜深了，早点休息 🌙','这个点还没睡？照顾好自己 🌛'],
+morning:['早上好，今天也要元气满满 🌱','早安，先喝杯水再开始吧 💧','早上好，慢慢来也来得及 ☀️','早安，今天有一件小事值得期待 🌼'],
+noon:['上午好，专注力最好的时候 ✨','上午好，先把最难的那件事啃掉 🍀','上午好，按自己的节奏来就好 🐢'],
+mid:['中午好，记得好好吃饭 🍚','中午好，吃饱才有力气下午 🥑','中午好，吃完走两步再回来 🚶'],
+aft:['下午好，来杯水歇两分钟 ☕','下午好，进度怎么样？别绷太紧 🌿','下午好，困了就眯十分钟 😴','下午好，慢慢来，你已经做得不错了 ✨'],
+eve:['晚上好，今天辛苦了 🌆','晚上好，把今天的事先放一放 🕯','晚上好，给自己留点放空的时间 🫧'],
+night:['晚上好，早点收工吧 🌙','晚上好，今天已经很不错了 ✨','晚上好，睡前别看太久手机 📵']
+};
+function pickGreet(){var h=now0.getHours();var arr=h<6?GREET.dawn:h<9?GREET.morning:h<12?GREET.noon:h<14?GREET.mid:h<18?GREET.aft:h<22?GREET.eve:GREET.night;return arr[Math.floor(Math.random()*arr.length)];}
+(function(){$('greet').textContent=pickGreet();$('hdDate').textContent=now0.getFullYear()+'年'+(now0.getMonth()+1)+'月'+now0.getDate()+'日 星期'+WEEK[now0.getDay()];})();
 function renderAvatar(){if(store.avatar){$('avatarImg').src=store.avatar;$('avatarImg').style.display='block';$('avatarEmoji').style.display='none';}else{$('avatarImg').style.display='none';$('avatarEmoji').style.display='';}}
 $('avatarWrap').onclick=function(){$('avatarInput').click();};
 $('avatarInput').onchange=function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var img=new Image();img.onload=function(){var s=Math.min(img.width,img.height);var c=document.createElement('canvas');c.width=c.height=240;var x=c.getContext('2d');x.drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,240,240);store.avatar=c.toDataURL('image/jpeg',0.85);save();renderAvatar();showToast('✅ 头像已更换');};img.src=r.result;};r.readAsDataURL(f);e.target.value='';};
@@ -292,21 +336,68 @@ $('catChips').onclick=function(e){var c=e.target.closest('.chip');if(c){state.le
 $('addLed').onclick=function(){var a=parseFloat($('amt').value);if(!a||a<=0)return showToast('请输入正确的金额');store.ledger.push({id:uid(),date:$('ledDate').value||today(),type:state.ledType,cat:state.ledCat,amt:Math.round(a*100)/100,note:$('ledNote').value.trim()});$('amt').value='';$('ledNote').value='';save();renderLedger();showToast('✅ 已记一笔');};
 $('ledList').onclick=function(e){var el=e.target.closest('[data-act]');if(!el)return;if(el.dataset.act==='delLed'){store.ledger=store.ledger.filter(function(x){return x.id!==el.dataset.id;});save();renderLedger();showToast('已删除');}};
 function money(n){return '¥'+(Math.round(n*100)/100).toFixed(2).replace(/\.00$/,'');}
-function renderLedStats(){$('lsTitle').textContent=state.lsY+'年'+(state.lsM+1)+'月';var din=0,dout=0,cnt=0,catT={};store.ledger.forEach(function(x){var d=new Date(x.date+'T00:00:00');if(d.getFullYear()!==state.lsY||d.getMonth()!==state.lsM)return;cnt++;if(x.type==='income')din+=x.amt;else{dout+=x.amt;catT[x.cat]=(catT[x.cat]||0)+x.amt;}});
+function renderLedStats(){state.openCat=state.openCat||'';$('lsTitle').textContent=state.lsY+'年'+(state.lsM+1)+'月';var din=0,dout=0,cnt=0,catT={};store.ledger.forEach(function(x){var d=new Date(x.date+'T00:00:00');if(d.getFullYear()!==state.lsY||d.getMonth()!==state.lsM)return;cnt++;if(x.type==='income')din+=x.amt;else{dout+=x.amt;catT[x.cat]=(catT[x.cat]||0)+x.amt;}});
 $('lsIn').textContent=money(din);$('lsOut').textContent=money(dout);$('lsBal').textContent=money(din-dout);$('lsCnt').textContent=cnt+' 笔';
 if(!cnt){$('lsBars').innerHTML='<div class="empty" style="padding:10px 0">本月还没有记账</div>';return;}
 var ks=Object.keys(catT).sort(function(a,b){return catT[b]-catT[a];});var html='';
-ks.forEach(function(c,ix){var pct=dout>0?Math.round(catT[c]/dout*100):0;html+='<div class="bar-row"><div class="bar-lbl"><span>'+(EMO[c]||'📦')+' '+c+'</span><span>'+money(catT[c])+' · '+pct+'%</span></div><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:'+BARC[ix%BARC.length]+'"></div></div></div>';});
+ks.forEach(function(c,ix){var pct=dout>0?Math.round(catT[c]/dout*100):0;var open=state.openCat===c;
+html+='<div class="bar-row clk" data-cat="'+c+'"><div class="bar-lbl"><span>'+(EMO[c]||'📦')+' '+c+' <i style="font-style:normal;color:#C9B6A5">'+(open?'▾':'▸')+'</i></span><span>'+money(catT[c])+' · '+pct+'%</span></div><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:'+BARC[ix%BARC.length]+'"></div></div></div>';
+if(open){var items=store.ledger.filter(function(x){var d=new Date(x.date+'T00:00:00');return x.type!=='income'&&x.cat===c&&d.getFullYear()===state.lsY&&d.getMonth()===state.lsM;}).sort(function(a,b){return b.amt-a.amt;});
+html+='<div class="cat-detail">';
+items.forEach(function(x){var md=new Date(x.date+'T00:00:00');html+='<div class="cd-row"><span>'+(md.getMonth()+1)+'/'+md.getDate()+' · '+esc(x.note||'无备注')+'</span><span style="font-weight:900;flex-shrink:0">'+money(x.amt)+'</span></div>';});
+html+='<div class="cd-row" style="border-top:1.5px solid var(--border)"><span style="color:var(--text);font-weight:800">共 '+items.length+' 笔</span><span style="font-weight:900;color:#E8607C">'+money(catT[c])+'</span></div></div>';}
+});
 $('lsBars').innerHTML=html;}
-$('lsPrev').onclick=function(){state.lsM--;if(state.lsM<0){state.lsM=11;state.lsY--;}renderLedStats();};
-$('lsNext').onclick=function(){state.lsM++;if(state.lsM>11){state.lsM=0;state.lsY++;}renderLedStats();};
+$('lsBars').onclick=function(e){var el=e.target.closest('[data-cat]');if(!el)return;state.openCat=(state.openCat===el.dataset.cat)?'':el.dataset.cat;renderLedStats();};
+$('lsPrev').onclick=function(){state.lsM--;if(state.lsM<0){state.lsM=11;state.lsY--;}state.openCat='';renderLedStats();};
+$('lsNext').onclick=function(){state.lsM++;if(state.lsM>11){state.lsM=0;state.lsY++;}state.openCat='';renderLedStats();};
 function renderLedger(){renderLedStats();var din=0,dout=0;store.ledger.forEach(function(x){if(x.type==='income')din+=x.amt;else dout+=x.amt;});$('sumIn').textContent=money(din);$('sumOut').textContent=money(dout);$('sumBal').textContent=money(din-dout);$('ledDate').value=$('ledDate').value||today();renderCats();var groups={},dates=[];store.ledger.forEach(function(x){if(!groups[x.date]){groups[x.date]=[];dates.push(x.date);}groups[x.date].push(x);});dates.sort().reverse();var html='';dates.forEach(function(d){html+='<div class="date-sep">'+disp(d)+(d===today()?' · 今天':'')+'</div>';groups[d].slice().reverse().forEach(function(x){var isInc=x.type==='income';html+='<div class="led-row"><div class="led-emo">'+(isInc?'💵':(EMO[x.cat]||'📦'))+'</div><div class="led-mid"><div class="led-cat">'+x.cat+'</div>'+(x.note?'<div class="led-note">'+esc(x.note)+'</div>':'')+'</div><div class="led-amt" style="color:'+(isInc?'#E8607C':'#6B9A3C')+'">'+(isInc?'+':'-')+money(x.amt)+'</div><button class="del" data-act="delLed" data-id="'+x.id+'">✕</button></div>';});});
 $('ledList').innerHTML=html||'<div class="empty">🧾 还没有记录<br>先记一笔吧</div>';}
+/* ---- 心情：月视图 + 周小结 ---- */
+function renderMoodCal(){$('mTitle').textContent=state.moodY+'年'+(state.moodM+1)+'月';var first=new Date(state.moodY,state.moodM,1).getDay();var days=new Date(state.moodY,state.moodM+1,0).getDate();var byDay={};store.moods.forEach(function(x){if(!byDay[x.date])byDay[x.date]={};byDay[x.date][x.mood]=(byDay[x.date][x.mood]||0)+1;});
+var html='';for(var b=0;b<first;b++)html+='<div></div>';
+for(var dd=1;dd<=days;dd++){var key=dkey(new Date(state.moodY,state.moodM,dd));var c=byDay[key];var emo='';if(c){var best='',mx=0;for(var n in c)if(c[n]>mx){mx=c[n];best=n;}emo=moodE(best);}
+var cls='mcell';if(key===today())cls+=' today';if(key===state.moodFilter)cls+=' sel';
+html+='<div class="'+cls+'" data-d="'+key+'"><div class="md">'+dd+'</div>'+(emo?'<div class="me">'+emo+'</div>':'')+'</div>';}
+$('mGrid').innerHTML=html;}
+$('mPrev').onclick=function(){state.moodM--;if(state.moodM<0){state.moodM=11;state.moodY--;}renderMoodCal();};
+$('mNext').onclick=function(){state.moodM++;if(state.moodM>11){state.moodM=0;state.moodY++;}renderMoodCal();};
+$('mGrid').onclick=function(e){var el=e.target.closest('.mcell');if(!el)return;var key=el.dataset.d;state.moodFilter=(state.moodFilter===key)?'':key;$('moodDate').value=key;renderMood();};
+function moodAdvice(c,dom,tot){var n=c[dom]||0;var map={
+'开心':'这周开心出现了 '+n+' 次，好状态值得被记住，把这份轻快带进下周 🌱',
+'平静':'这周多数时候你都很平稳（平静 '+n+' 次），安静本身也是一种力量 🌊',
+'一般':'这周平平淡淡（一般 '+n+' 次），没有大波动也是一种稳稳的幸福 🍃',
+'疲惫':'这周你有点累（疲惫 '+n+' 次），记得留一个早点睡的晚上，休息也是正事 😪',
+'焦虑':'这周心里有些紧绷（焦虑 '+n+' 次），深呼吸，事情一件一件来就好 🫧',
+'难过':'这周有几段不太好受的时光，允许自己低落，也别忘了你已经在努力了 🤍',
+'沮丧':'这周好像被什么按住了（沮丧 '+n+' 次），别急着自责，先做一件小小的、能完成的事 ✨'};
+var s=map[dom]||('这周记录了 '+tot+' 条心情，愿意写下来本身就很了不起。');
+if(dom!=='开心'&&(c['开心']||0)>0)s+=' 不过也有 '+c['开心']+' 次开心，别忘了它。';
+return s;}
+function renderMoodWeek(){var m=mondayOf(new Date());m.setDate(m.getDate()+state.moodWkOff*7);var e=new Date(m);e.setDate(m.getDate()+6);var ks=dkey(m),ke=dkey(e);
+$('mwTitle').textContent=state.moodWkOff===0?'本周心情小结':(state.moodWkOff===-1?'上周心情小结':'心情小结');
+var inR=function(k){return k>=ks&&k<=ke;};var cnt={},tot=0;store.moods.forEach(function(x){if(inR(x.date)){tot++;cnt[x.mood]=(cnt[x.mood]||0)+1;}});
+var html='<div style="font-size:11px;color:var(--sub);font-weight:800;margin-bottom:9px">'+disp(ks)+' ~ '+disp(ke)+' · 共 '+tot+' 条</div>';
+if(!tot){html+='<div class="empty" style="padding:10px 0">这周还没有心情记录 🌤<br>记一条，周末就能看到小结了</div>';}
+else{var dom='',mx=0;for(var n in cnt)if(cnt[n]>mx){mx=cnt[n];dom=n;}
+html+='<div class="row" style="flex-wrap:wrap;gap:6px;margin-bottom:10px">';
+MOODS.forEach(function(mo){if(cnt[mo.n])html+='<span class="mchip">'+mo.e+' '+mo.n+' ×'+cnt[mo.n]+'</span>';});
+html+='</div><div class="mood-sum">'+moodAdvice(cnt,dom,tot)+'</div>';}
+$('mwBody').innerHTML=html;}
+$('mwPrev').onclick=function(){state.moodWkOff--;renderMoodWeek();};
+$('mwNext').onclick=function(){if(state.moodWkOff>=0)return;state.moodWkOff++;renderMoodWeek();};
 function renderMoodGrid(){var html='';MOODS.forEach(function(m){html+='<div class="mood-it'+(state.mood===m.n?' on':'')+'" data-m="'+m.n+'" title="'+m.n+'">'+m.e+'</div>';});$('moodGrid').innerHTML=html;}
 $('moodGrid').onclick=function(e){var el=e.target.closest('.mood-it');if(el){state.mood=el.dataset.m;renderMoodGrid();}};
-$('addMood').onclick=function(){var t=$('moodTxt').value.trim();var now=new Date();store.moods.push({id:uid(),date:$('moodDate').value||today(),mood:state.mood,text:t,time:pad(now.getHours())+':'+pad(now.getMinutes())});$('moodTxt').value='';save();renderMood();showToast('💚 已记录你的心情');};
+$('addMood').onclick=function(){var t=$('moodTxt').value.trim();var now=new Date();var d=$('moodDate').value||today();store.moods.push({id:uid(),date:d,mood:state.mood,text:t,time:pad(now.getHours())+':'+pad(now.getMinutes())});$('moodTxt').value='';save();renderMood();showToast('💚 已记录你的心情');};
 $('moodList').onclick=function(e){var el=e.target.closest('[data-act]');if(!el)return;if(el.dataset.act==='delMood'){store.moods=store.moods.filter(function(x){return x.id!==el.dataset.id;});save();renderMood();}};
-function renderMood(){renderMoodGrid();$('moodDate').value=$('moodDate').value||today();var groups={},dates=[];store.moods.forEach(function(x){if(!groups[x.date]){groups[x.date]=[];dates.push(x.date);}groups[x.date].push(x);});dates.sort().reverse();var html='';dates.forEach(function(d){html+='<div class="date-sep">'+disp(d)+(d===today()?' · 今天':'')+'</div>';groups[d].forEach(function(x){html+='<div class="mood-row"><div class="mood-emo">'+moodE(x.mood)+'</div><div class="mood-txt">'+(x.text?esc(x.text):'<i style="color:var(--sub)">（未附文字）</i>')+'<div class="mood-time">'+x.mood+' · '+x.time+'</div></div><button class="del" data-act="delMood" data-id="'+x.id+'">✕</button></div>';});});
+$('moodFilterBar').onclick=function(e){var el=e.target.closest('[data-act]');if(!el)return;if(el.dataset.act==='clearMoodFilter'){state.moodFilter='';renderMood();}};
+function renderMood(){renderMoodCal();renderMoodWeek();renderMoodGrid();if(state.moodFilter)$('moodDate').value=state.moodFilter;else if(!$('moodDate').value)$('moodDate').value=today();
+$('moodFilterBar').innerHTML=state.moodFilter?'<div class="backline" style="margin-bottom:8px"><b style="font-size:14px">📅 '+disp(state.moodFilter)+'</b><button class="linkbtn" data-act="clearMoodFilter">查看全部 →</button></div>':'';
+var list=state.moodFilter?store.moods.filter(function(x){return x.date===state.moodFilter;}):store.moods.slice();
+if(state.moodFilter){var html0='';if(!list.length){$('moodList').innerHTML='<div class="empty">这天还没有记录<br>选个表情，给这天补一条吧</div>';return;}
+list.forEach(function(x){html0+='<div class="mood-row"><div class="mood-emo">'+moodE(x.mood)+'</div><div class="mood-txt">'+(x.text?esc(x.text):'<i style="color:var(--sub)">（未附文字）</i>')+'<div class="mood-time">'+x.mood+' · '+x.time+'</div></div><button class="del" data-act="delMood" data-id="'+x.id+'">✕</button></div>';});
+$('moodList').innerHTML=html0;return;}
+var groups={},dates=[];list.forEach(function(x){if(!groups[x.date]){groups[x.date]=[];dates.push(x.date);}groups[x.date].push(x);});dates.sort().reverse();var html='';dates.forEach(function(d){html+='<div class="date-sep">'+disp(d)+(d===today()?' · 今天':'')+'</div>';groups[d].forEach(function(x){html+='<div class="mood-row"><div class="mood-emo">'+moodE(x.mood)+'</div><div class="mood-txt">'+(x.text?esc(x.text):'<i style="color:var(--sub)">（未附文字）</i>')+'<div class="mood-time">'+x.mood+' · '+x.time+'</div></div><button class="del" data-act="delMood" data-id="'+x.id+'">✕</button></div>';});});
 $('moodList').innerHTML=html||'<div class="empty">🌤 还没有日记<br>选个表情记录此刻吧</div>';}
 /* ---- 灵感模块 ---- */
 var mediaR=null,recStream=null,chunks=[],recT0=0,recTimer=null,pendingAudio='';
