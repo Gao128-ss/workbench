@@ -34,6 +34,7 @@ input:focus,textarea:focus{border-color:var(--pink);}
 .row{display:flex;gap:8px;align-items:center;}
 .chip{border:1.5px solid var(--border);border-radius:999px;padding:6px 13px;font-size:13px;background:#fff;color:var(--sub);cursor:pointer;user-select:none;font-weight:600;}
 .chip.on{background:var(--mint);border-color:var(--avo);color:var(--text);}
+.chip.lib{font-size:12px;padding:5px 11px;}
 .empty{text-align:center;color:var(--sub);font-size:13px;padding:22px 0;line-height:1.8;}
 nav{display:flex;background:#fff;border-top:1.5px solid var(--border);padding:8px 6px calc(10px + env(safe-area-inset-bottom));}
 nav .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--sub);cursor:pointer;font-weight:600;padding:5px 0;border-radius:14px;}
@@ -43,12 +44,13 @@ nav .tab svg{width:22px;height:22px;}
 .cal-title{font-size:16px;font-weight:800;}
 .cal-nav{width:32px;height:32px;border-radius:10px;background:#fff;border:1.5px solid var(--border);cursor:pointer;color:var(--text);font-size:15px;}
 .dow{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px;text-align:center;font-size:11px;color:var(--sub);font-weight:700;}
-#calGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+#calGrid,#fGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
 .cal-cell{aspect-ratio:1/1.06;background:#fff;border:1.5px solid var(--border);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer;padding:2px;}
 .cal-cell .d{font-size:13px;font-weight:700;line-height:1;}
 .cal-cell .cnt{font-size:9px;color:var(--avo);font-weight:800;}
 .cal-cell .dots{display:flex;gap:2px;}
 .cal-cell .dots i{width:4px;height:4px;border-radius:50%;background:var(--pink);display:block;}
+.cal-cell .rice{font-size:9px;line-height:1;}
 .cal-cell.today{border-color:var(--pink);background:#FFF0F3;}
 .cal-cell.sel{background:var(--mint);border-color:var(--avo);}
 .cal-cell.sel .cnt{color:var(--text);}
@@ -107,6 +109,9 @@ nav .tab svg{width:22px;height:22px;}
 .note-add{display:flex;gap:6px;margin-top:7px;}
 .note-add input{font-size:12px;padding:6px 9px;border-radius:10px;}
 .fit-badge{font-size:10px;background:#EFFAE3;color:#6B9A3C;border-radius:999px;padding:2px 8px;font-weight:800;}
+.meal-row{display:flex;align-items:center;gap:9px;background:#FFFEFC;border:1.5px solid var(--border);border-radius:14px;padding:9px 11px;margin-bottom:8px;}
+.meal-name{font-size:13px;font-weight:800;flex-shrink:0;}
+.meal-row input{flex:1;font-size:13px;padding:7px 9px;}
 .idea-it{background:#FFFEFC;border:1.5px solid var(--border);border-radius:14px;padding:11px 13px;margin-bottom:9px;}
 .idea-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
 .idea-date{font-size:10px;color:var(--sub);font-weight:800;}
@@ -235,17 +240,36 @@ audio{width:100%;height:36px;margin-top:7px;}
       <div class="card"><h3>🧪 灵感收藏夹</h3><div id="ideaList"></div></div>
     </section>
     <section class="view" id="v-fit">
-      <div class="card">
-        <h3>🏋️ 今日打卡 <span class="fit-badge" id="fitProg"></span></h3>
-        <div class="row"><span style="font-size:12px;color:var(--sub);font-weight:700;flex-shrink:0">打卡日期</span><input type="date" id="fitDate" style="flex:1"></div>
-        <div class="track" style="margin-top:10px"><div class="fill" id="fitFill"></div></div>
+      <div id="fitCal">
+        <div class="card">
+          <div class="cal-head">
+            <button class="cal-nav" id="fPrev">◀</button>
+            <div class="cal-title" id="fTitle"></div>
+            <button class="cal-nav" id="fNext">▶</button>
+          </div>
+          <div class="dow"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+          <div id="fGrid"></div>
+          <div class="legend">格子里是当天训练 完成数/总数，🍚 表示记了三餐，点某天进入当天安排</div>
+        </div>
       </div>
-      <div class="sec-sub">💪 健身计划（完成一项勾一项）</div>
-      <div id="planList"></div>
-      <div class="row" style="margin-bottom:14px"><input type="text" id="planInput" placeholder="添加训练动作，如：杠铃臀推"><button class="btn" id="addPlan">添加</button></div>
-      <div class="sec-sub">🍚 一日三餐</div>
-      <div id="mealList"></div>
-      <div class="row"><input type="text" id="mealInput" placeholder="添加餐次，如：加餐"><button class="btn" id="addMeal">添加</button></div>
+      <div id="fitDay" style="display:none">
+        <div class="backline"><b id="fDayTitle"></b><button class="linkbtn" id="backFCal">← 返回月视图</button></div>
+        <div class="card">
+          <h3>🏋️ 当日打卡 <span class="fit-badge" id="fitProg"></span></h3>
+          <div class="track"><div class="fill" id="fitFill"></div></div>
+        </div>
+        <div class="card"><h3>💪 训练安排（完成一项勾一项）</h3>
+          <div id="dayPlanList"></div>
+          <div class="row" style="margin-top:10px"><input type="text" id="dayPlanInput" placeholder="添加训练动作，如：杠铃臀推"><button class="btn" id="addDayPlan">添加</button></div>
+          <div id="fitLib" class="row" style="flex-wrap:wrap;margin-top:10px"></div>
+          <div class="legend" id="libHint" style="margin-top:4px"></div>
+          <div style="margin-top:10px"><button class="btn ghost sm" id="copyYday">📋 复制上一天的安排</button></div>
+        </div>
+        <div class="card"><h3>🍚 一日三餐</h3>
+          <div id="dayMealList"></div>
+          <div class="row" style="margin-top:10px"><input type="text" id="dayMealInput" placeholder="添加餐次，如：加餐"><button class="btn" id="addDayMeal">添加</button></div>
+        </div>
+      </div>
     </section>
   </main>
   <nav id="tabbar">
@@ -277,9 +301,19 @@ audio{width:100%;height:36px;margin-top:7px;}
 <script>
 (function(){
 var KEY='personalWorkbench_v1';
-function blank(){return {tasks:{},ledger:[],moods:[],ideas:[],fitPlan:[],fitMeals:[{id:'meal1',name:'早餐'},{id:'meal2',name:'午餐'},{id:'meal3',name:'晚餐'}],fitChecks:{},fitNotes:{},avatar:'',sync:{key:'',bin:''},lastWeek:''};}
+function blank(){return {tasks:{},ledger:[],moods:[],ideas:[],fitDays:{},fitLib:[],avatar:'',sync:{key:'',bin:''},lastWeek:''};}
 var store=blank();
 try{var raw=window.localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);for(var k in blank()){if(!(k in p))p[k]=blank()[k];}store=p;}}catch(e){}
+/* ---- 旧版健身数据迁移 ---- */
+(function(){var hasOld=store.fitPlan||store.fitChecks||store.fitMeals;if(!hasOld)return;
+if(!store.fitDays)store.fitDays={};if(!store.fitLib)store.fitLib=[];
+if(store.fitPlan)store.fitPlan.forEach(function(it){if(it&&it.name&&store.fitLib.indexOf(it.name)<0)store.fitLib.push(it.name);});
+if(store.fitChecks){Object.keys(store.fitChecks).forEach(function(d){var day=store.fitDays[d]||{plan:[],meals:[]};
+if(store.fitPlan)store.fitPlan.forEach(function(it){if(!it)return;day.plan.push({id:uid(),name:it.name,done:!!store.fitChecks[d][it.id],notes:(store.fitNotes&&store.fitNotes[it.id])?store.fitNotes[it.id].slice():[]});});
+if(store.fitMeals)store.fitMeals.forEach(function(mt){if(!mt)return;day.meals.push({id:uid(),name:mt.name,text:'',done:!!store.fitChecks[d][mt.id]});});
+if(day.plan.length||day.meals.length)store.fitDays[d]=day;});}
+delete store.fitPlan;delete store.fitMeals;delete store.fitChecks;delete store.fitNotes;
+save();})();
 function save(){try{window.localStorage.setItem(KEY,JSON.stringify(store));}catch(e){showToast('⚠️ 浏览器存储快满了，最新内容可能没存上（建议删掉旧的带录音灵感）');}}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 function pad(n){return (n<10?'0':'')+n;}
@@ -292,14 +326,14 @@ function $(id){return document.getElementById(id);}
 function showToast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('on');},2600);}
 function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 var now0=new Date();
-var state={view:'v-plan',planView:'cal',calY:now0.getFullYear(),calM:now0.getMonth(),curDate:today(),ledType:'expense',ledCat:'餐饮',mood:'开心',fitDate:today(),lsY:now0.getFullYear(),lsM:now0.getMonth(),openCat:'',moodY:now0.getFullYear(),moodM:now0.getMonth(),moodWkOff:0,moodFilter:''};
+var state={view:'v-plan',planView:'cal',calY:now0.getFullYear(),calM:now0.getMonth(),curDate:today(),ledType:'expense',ledCat:'餐饮',mood:'开心',lsY:now0.getFullYear(),lsM:now0.getMonth(),openCat:'',moodY:now0.getFullYear(),moodM:now0.getMonth(),moodWkOff:0,moodFilter:'',fitView:'cal',fitCalY:now0.getFullYear(),fitCalM:now0.getMonth(),fitCurDate:today()};
 var PT={'普通':{bg:'#EFFAE3',c:'#6B9A3C'},'重要':{bg:'#FFF3E0',c:'#C77800'},'紧急':{bg:'#FFE4E4',c:'#D64545'}};
 var CATS={expense:['餐饮','交通','购物','医疗','宠物','日用品','其他'],income:['工资','其他']};
 var EMO={'餐饮':'🍜','交通':'🚌','购物':'🛍','医疗':'💊','宠物':'🐶','日用品':'🧴','其他':'📦','工资':'💰'};
 var MOODS=[{n:'开心',e:'😄'},{n:'平静',e:'🙂'},{n:'一般',e:'😐'},{n:'疲惫',e:'😪'},{n:'焦虑',e:'😟'},{n:'难过',e:'😢'},{n:'沮丧',e:'😞'}];
 var BARC=['#FF9FB3','#B8E6A8','#FFD8A8','#C9E2F5','#E3DDF5','#FFE0CE','#D4EFC9'];
+var DEFMEALS=['早餐','午餐','晚餐'];
 function moodE(n){for(var i=0;i<MOODS.length;i++)if(MOODS[i].n===n)return MOODS[i].e;return '🙂';}
-/* ---- 随机问候语 ---- */
 var GREET={
 dawn:['夜深了，早点休息 🌙','这个点还没睡？照顾好自己 🌛'],
 morning:['早上好，今天也要元气满满 🌱','早安，先喝杯水再开始吧 💧','早上好，慢慢来也来得及 ☀️','早安，今天有一件小事值得期待 🌼'],
@@ -336,7 +370,7 @@ $('catChips').onclick=function(e){var c=e.target.closest('.chip');if(c){state.le
 $('addLed').onclick=function(){var a=parseFloat($('amt').value);if(!a||a<=0)return showToast('请输入正确的金额');store.ledger.push({id:uid(),date:$('ledDate').value||today(),type:state.ledType,cat:state.ledCat,amt:Math.round(a*100)/100,note:$('ledNote').value.trim()});$('amt').value='';$('ledNote').value='';save();renderLedger();showToast('✅ 已记一笔');};
 $('ledList').onclick=function(e){var el=e.target.closest('[data-act]');if(!el)return;if(el.dataset.act==='delLed'){store.ledger=store.ledger.filter(function(x){return x.id!==el.dataset.id;});save();renderLedger();showToast('已删除');}};
 function money(n){return '¥'+(Math.round(n*100)/100).toFixed(2).replace(/\.00$/,'');}
-function renderLedStats(){state.openCat=state.openCat||'';$('lsTitle').textContent=state.lsY+'年'+(state.lsM+1)+'月';var din=0,dout=0,cnt=0,catT={};store.ledger.forEach(function(x){var d=new Date(x.date+'T00:00:00');if(d.getFullYear()!==state.lsY||d.getMonth()!==state.lsM)return;cnt++;if(x.type==='income')din+=x.amt;else{dout+=x.amt;catT[x.cat]=(catT[x.cat]||0)+x.amt;}});
+function renderLedStats(){$('lsTitle').textContent=state.lsY+'年'+(state.lsM+1)+'月';var din=0,dout=0,cnt=0,catT={};store.ledger.forEach(function(x){var d=new Date(x.date+'T00:00:00');if(d.getFullYear()!==state.lsY||d.getMonth()!==state.lsM)return;cnt++;if(x.type==='income')din+=x.amt;else{dout+=x.amt;catT[x.cat]=(catT[x.cat]||0)+x.amt;}});
 $('lsIn').textContent=money(din);$('lsOut').textContent=money(dout);$('lsBal').textContent=money(din-dout);$('lsCnt').textContent=cnt+' 笔';
 if(!cnt){$('lsBars').innerHTML='<div class="empty" style="padding:10px 0">本月还没有记账</div>';return;}
 var ks=Object.keys(catT).sort(function(a,b){return catT[b]-catT[a];});var html='';
@@ -423,16 +457,61 @@ $('ideaList').onclick=function(e){var el=e.target.closest('[data-act]');if(!el)r
 function renderIdea(){recReset();var arr=store.ideas.slice().sort(function(a,b){return (a.date+a.time)<(b.date+b.time)?1:-1;});var html='';
 arr.forEach(function(x){html+='<div class="idea-it"><div class="idea-head"><span class="idea-date">💡 '+disp(x.date)+' · '+x.time+(x.audio?'<span class="idea-audio-tag">🎙 有录音</span>':'')+'</span><button class="del" data-act="delIdea" data-id="'+x.id+'">✕</button></div>'+(x.text?'<div class="idea-txt">'+esc(x.text)+'</div>':'')+(x.audio?'<audio controls src="'+x.audio+'"></audio>':'')+'</div>';});
 $('ideaList').innerHTML=html||'<div class="empty">💡 还没有灵感<br>想到什么随时记一条，别让它溜走</div>';}
-$('fitDate').onchange=function(){state.fitDate=this.value||today();renderFit();};
-$('addPlan').onclick=function(){var v=$('planInput').value.trim();if(!v)return;store.fitPlan.push({id:uid(),name:v});$('planInput').value='';save();renderFit();};
-$('addMeal').onclick=function(){var v=$('mealInput').value.trim();if(!v)return;store.fitMeals.push({id:uid(),name:v});$('mealInput').value='';save();renderFit();};
-function fitClick(root){root.onclick=function(e){var el=e.target.closest('[data-act]');if(!el)return;var act=el.dataset.act,id=el.dataset.id;if(act==='check'){var c=store.fitChecks[state.fitDate]||{};if(c[id]){delete c[id];}else{c[id]=true;showToast('🎉 打卡成功！');}store.fitChecks[state.fitDate]=c;save();renderFit();return;}
-if(act==='delItem'){if(!confirm('确定删除「'+el.dataset.name+'」？其笔记和打卡记录也会删除。'))return;['fitPlan','fitMeals'].forEach(function(k){store[k]=store[k].filter(function(x){return x.id!==id;});});delete store.fitNotes[id];Object.keys(store.fitChecks).forEach(function(d){if(store.fitChecks[d][id])delete store.fitChecks[d][id];});save();renderFit();return;}
-if(act==='addNote'){var inp=root.querySelector('input[data-ni="'+id+'"]');var v=inp.value.trim();if(!v)return;if(!store.fitNotes[id])store.fitNotes[id]=[];store.fitNotes[id].push({id:uid(),text:v,date:state.fitDate});save();renderFit();return;}
-if(act==='delNote'){var nid=el.dataset.nid;store.fitNotes[id]=(store.fitNotes[id]||[]).filter(function(x){return x.id!==nid;});save();renderFit();}};}
-function fitItemsHTML(list){var html='';var checks=store.fitChecks[state.fitDate]||{};list.forEach(function(it){var ck=!!checks[it.id];var notes=store.fitNotes[it.id]||[];var nh='';notes.forEach(function(n){nh+='<div class="note-it">📝<span>'+esc(n.text)+'<i style="font-size:10px;color:#C9B6A5"> '+n.date+'</i></span><button class="del" data-act="delNote" data-id="'+it.id+'" data-nid="'+n.id+'">✕</button></div>';});
-html+='<div class="fit-item"><div class="fit-top"><div class="chk'+(ck?' done':'')+'" data-act="check" data-id="'+it.id+'">✓</div><div class="fit-name">'+esc(it.name)+'</div>'+(notes.length?'<span class="fit-badge">'+notes.length+'条笔记</span>':'')+'<button class="del" data-act="delItem" data-id="'+it.id+'" data-name="'+esc(it.name)+'">🗑</button></div><div class="note-list">'+nh+'</div><div class="note-add"><input type="text" data-ni="'+it.id+'" placeholder="添加笔记…"><button class="btn ghost sm" data-act="addNote" data-id="'+it.id+'">＋</button></div></div>';});return html||'<div class="empty">还没有项目，先添加一个吧</div>';}
-function renderFit(){$('fitDate').value=state.fitDate;var all=store.fitPlan.concat(store.fitMeals);var checks=store.fitChecks[state.fitDate]||{};var dn=0;all.forEach(function(x){if(checks[x.id])dn++;});$('fitProg').textContent='已完成 '+dn+' / '+all.length;$('fitFill').style.width=all.length?Math.round(dn/all.length*100)+'%':'0%';$('planList').innerHTML=fitItemsHTML(store.fitPlan);$('mealList').innerHTML=fitItemsHTML(store.fitMeals);fitClick($('planList'));fitClick($('mealList'));}
+/* ---- 健身：月视图 + 按天训练/三餐 ---- */
+function getDay(d){if(!store.fitDays[d])store.fitDays[d]={plan:[],meals:DEFMEALS.map(function(m){return {id:uid(),name:m,text:''};});}
+if(!store.fitDays[d].plan)store.fitDays[d].plan=[];if(!store.fitDays[d].meals)store.fitDays[d].meals=[];return store.fitDays[d];}
+$('fPrev').onclick=function(){state.fitCalM--;if(state.fitCalM<0){state.fitCalM=11;state.fitCalY--;}renderFitCal();};
+$('fNext').onclick=function(){state.fitCalM++;if(state.fitCalM>11){state.fitCalM=0;state.fitCalY++;}renderFitCal();};
+$('backFCal').onclick=function(){state.fitView='cal';renderFit();};
+function renderFitCal(){$('fTitle').textContent=state.fitCalY+'年'+(state.fitCalM+1)+'月';var first=new Date(state.fitCalY,state.fitCalM,1).getDay();var days=new Date(state.fitCalY,state.fitCalM+1,0).getDate();
+var html='';for(var b=0;b<first;b++)html+='<div></div>';
+for(var dd=1;dd<=days;dd++){var key=dkey(new Date(state.fitCalY,state.fitCalM,dd));var day=store.fitDays[key];
+var dn=0,tot=0,rice=false;
+if(day){tot=day.plan.length;day.plan.forEach(function(it){if(it.done)dn++;});rice=day.meals.some(function(m){return m.text&&m.text.trim();});}
+var cls='cal-cell';if(key===today())cls+=' today';if(key===state.fitCurDate&&state.fitView==='day')cls+=' sel';
+html+='<div class="'+cls+'" data-d="'+key+'"><div class="d">'+dd+'</div>'+(tot?'<div class="cnt">'+dn+'/'+tot+'</div><div class="dots">'+'<i></i>'.repeat(Math.min(tot,3))+'</div>':'')+(rice?'<div class="rice">🍚</div>':'')+'</div>';}
+$('fGrid').innerHTML=html;}
+$('fGrid').onclick=function(e){var c=e.target.closest('.cal-cell');if(!c)return;state.fitCurDate=c.dataset.d;state.fitView='day';renderFit();};
+$('addDayPlan').onclick=function(){var v=$('dayPlanInput').value.trim();if(!v)return;var day=getDay(state.fitCurDate);
+day.plan.push({id:uid(),name:v,done:false,notes:[]});
+if(store.fitLib.indexOf(v)<0)store.fitLib.push(v);
+$('dayPlanInput').value='';save();renderFit();};
+$('dayPlanInput').addEventListener('keydown',function(e){if(e.key==='Enter')$('addDayPlan').click();});
+$('addDayMeal').onclick=function(){var v=$('dayMealInput').value.trim();if(!v)return;var day=getDay(state.fitCurDate);day.meals.push({id:uid(),name:v,text:''});$('dayMealInput').value='';save();renderFit();};
+$('dayMealInput').addEventListener('keydown',function(e){if(e.key==='Enter')$('addDayMeal').click();});
+$('fitLib').onclick=function(e){var c=e.target.closest('[data-lib]');if(!c)return;var day=getDay(state.fitCurDate);var name=c.dataset.lib;
+for(var i=0;i<day.plan.length;i++)if(day.plan[i].name===name)return showToast('今天已经有「'+name+'」啦');
+day.plan.push({id:uid(),name:name,done:false,notes:[]});save();renderFit();showToast('✅ 已加入今天的安排');};
+$('copyYday').onclick=function(){var d=new Date(state.fitCurDate+'T00:00:00');d.setDate(d.getDate()-1);var pk=dkey(d);var pd=store.fitDays[pk];
+if(!pd||!pd.plan.length)return showToast('上一天（'+disp(pk)+'）没有训练安排');
+if(!confirm('用 '+disp(pk)+' 的 '+pd.plan.length+' 项安排替换今天？（勾选状态重置为未完成）'))return;
+var day=getDay(state.fitCurDate);day.plan=pd.plan.map(function(it){return {id:uid(),name:it.name,done:false,notes:[]};});
+save();renderFit();showToast('📋 已复制上一天的安排');};
+$('dayPlanList').onclick=function(e){var el=e.target.closest('[data-act]');if(!el)return;var day=getDay(state.fitCurDate);var id=el.dataset.id,it=null;
+day.plan.forEach(function(x){if(x.id===id)it=x;});if(!it)return;
+if(el.dataset.act==='chk'){it.done=!it.done;if(it.done)showToast('🎉 打卡成功！');save();renderFit();return;}
+if(el.dataset.act==='delItem'){if(!confirm('删除「'+it.name+'」？（其笔记一并删除）'))return;day.plan=day.plan.filter(function(x){return x.id!==id;});save();renderFit();return;}
+if(el.dataset.act==='addNote'){var inp=$('dayPlanList').querySelector('input[data-ni="'+id+'"]');var v=inp?inp.value.trim():'';if(!v)return;it.notes.push({id:uid(),text:v,date:state.fitCurDate});save();renderFit();return;}
+if(el.dataset.act==='delNote'){var nid=el.dataset.nid;it.notes=it.notes.filter(function(x){return x.id!==nid;});save();renderFit();}};
+$('dayMealList').addEventListener('input',function(e){var mi=e.target.getAttribute('data-mi');if(!mi)return;var day=store.fitDays[state.fitCurDate];if(!day)return;
+day.meals.forEach(function(m){if(m.id===mi)m.text=e.target.value;});save();});
+$('dayMealList').onclick=function(e){var el=e.target.closest('[data-act]');if(!el)return;if(el.dataset.act==='delMeal'){var day=getDay(state.fitCurDate);day.meals=day.meals.filter(function(x){return x.id!==el.dataset.id;});save();renderFit();}};
+function renderFit(){var cal=$('fitCal'),day=$('fitDay');
+if(state.fitView==='cal'){cal.style.display='';day.style.display='none';renderFitCal();return;}
+cal.style.display='none';day.style.display='';
+var d=getDay(state.fitCurDate);
+$('fDayTitle').textContent=disp(state.fitCurDate)+(state.fitCurDate===today()?' · 今天':'');
+var dn=0;d.plan.forEach(function(it){if(it.done)dn++;});
+$('fitProg').textContent=d.plan.length?('已完成 '+dn+' / '+d.plan.length):'今天还没有安排';
+$('fitFill').style.width=d.plan.length?Math.round(dn/d.plan.length*100)+'%':'0%';
+var html='';
+d.plan.forEach(function(it){var nh='';(it.notes||[]).forEach(function(n){nh+='<div class="note-it">📝<span>'+esc(n.text)+'</span><button class="del" data-act="delNote" data-id="'+it.id+'" data-nid="'+n.id+'">✕</button></div>';});
+html+='<div class="fit-item"><div class="fit-top"><div class="chk'+(it.done?' done':'')+'" data-act="chk" data-id="'+it.id+'">✓</div><div class="fit-name'+(it.done?' done':'')+'">'+esc(it.name)+'</div>'+(it.notes&&it.notes.length?'<span class="fit-badge">'+it.notes.length+'条笔记</span>':'')+'<button class="del" data-act="delItem" data-id="'+it.id+'">🗑</button></div><div class="note-list">'+nh+'</div><div class="note-add"><input type="text" data-ni="'+it.id+'" placeholder="给这个动作记条笔记…"><button class="btn ghost sm" data-act="addNote" data-id="'+it.id+'">＋</button></div></div>';});
+$('dayPlanList').innerHTML=html||'<div class="empty">💪 今天还没安排<br>手动添加或从常用动作里点一个</div>';
+var lib='';store.fitLib.slice(0,10).forEach(function(n){lib+='<span class="chip lib" data-lib="'+esc(n)+'">＋ '+esc(n)+'</span>';});
+$('fitLib').innerHTML=lib;$('libHint').textContent=store.fitLib.length?'常用动作，点一下加到今天（自动记录你添加过的动作）':'';
+var mh='';d.meals.forEach(function(m){mh+='<div class="meal-row"><span class="meal-name">'+esc(m.name)+'</span><input type="text" data-mi="'+m.id+'" value="'+esc(m.text)+'" placeholder="吃了什么？随手记一笔"><button class="del" data-act="delMeal" data-id="'+m.id+'">✕</button></div>';});
+$('dayMealList').innerHTML=mh||'<div class="empty">🍚 还没有餐次</div>';}
 /* ---- 每周汇总 ---- */
 function buildWeekly(){var m=mondayOf(new Date());var e=new Date(m);e.setDate(m.getDate()+6);var ks=dkey(m),ke=dkey(e);$('wkRange').textContent='统计范围：'+disp(ks)+' ~ '+disp(ke);
 var inR=function(k){return k>=ks&&k<=ke;};var li=0,lo=0,lc=0;store.ledger.forEach(function(x){if(inR(x.date)){lc++;if(x.type==='income')li+=x.amt;else lo+=x.amt;}});
@@ -440,13 +519,13 @@ var td=0,tt=0;Object.keys(store.tasks).forEach(function(k){if(!inR(k))return;sto
 var mc={},mn=0;store.moods.forEach(function(x){if(inR(x.date)){mn++;mc[x.mood]=(mc[x.mood]||0)+1;}});
 var topM='';var topN=0;for(var n in mc)if(mc[n]>topN){topN=mc[n];topM=n;}
 var ic=0;store.ideas.forEach(function(x){if(inR(x.date))ic++;});
-var fc=0;Object.keys(store.fitChecks).forEach(function(k){if(!inR(k))return;fc+=Object.keys(store.fitChecks[k]).length;});
+var fd=0,fc=0;Object.keys(store.fitDays).forEach(function(k){if(!inR(k))return;var day=store.fitDays[k];day.plan.forEach(function(it){if(it.done)fc++;});if(day.plan.length&&day.plan.every(function(it){return it.done;}))fd++;});
 var html='';
 html+='<div class="wk-row"><span class="wk-l">🧾 记账</span><span class="wk-v">'+lc+' 笔<br>收入 '+money(li)+' · 支出 '+money(lo)+'</span></div>';
 html+='<div class="wk-row"><span class="wk-l">✅ 待办</span><span class="wk-v">'+(tt?td+' / '+tt+' 已完成':'本周没有待办')+'</span></div>';
 html+='<div class="wk-row"><span class="wk-l">🌤 心情</span><span class="wk-v">'+(mn?mn+' 条'+(topM?'<br>最多：'+topM+moodE(topM):''):'本周没有记录')+'</span></div>';
 html+='<div class="wk-row"><span class="wk-l">💡 灵感</span><span class="wk-v">'+(ic?ic+' 条新灵感':'本周没有新灵感')+'</span></div>';
-html+='<div class="wk-row"><span class="wk-l">🏋️ 健身</span><span class="wk-v">'+(fc?fc+' 项次打卡':'本周没有打卡')+'</span></div>';
+html+='<div class="wk-row"><span class="wk-l">🏋️ 健身</span><span class="wk-v">'+(fc?fc+' 项次打卡'+(fd?'<br>'+fd+' 天全勤':''):'本周没有打卡')+'</span></div>';
 $('wkBody').innerHTML=html;}
 function openWeekly(){buildWeekly();$('mask2').classList.add('on');}
 $('wbtn').onclick=openWeekly;
@@ -457,12 +536,6 @@ $('closeMask').onclick=function(){$('mask').classList.remove('on');};
 $('mask').onclick=function(e){if(e.target===this)this.classList.remove('on');};
 $('saveSync').onclick=function(){store.sync.key=$('syncKey').value.trim();store.sync.bin=$('syncBin').value.trim();save();$('syncMsg').textContent='✅ 配置已保存';};
 $('pushCloud').onclick=function(){if(!store.sync.key||!store.sync.bin)return showToast('请先填写并保存同步配置');$('syncMsg').textContent='⏳ 正在上传…';fetch('https://api.jsonbin.io/v3/b/'+store.sync.bin,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':store.sync.key,'X-Bin-Versioning':'false'},body:JSON.stringify(store)}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(function(){$('syncMsg').textContent='✅ 已上传到云端（'+new Date().toLocaleTimeString()+'）';}).catch(function(err){$('syncMsg').textContent='❌ 上传失败：'+err.message+'（数据可能太大或密钥有误）';});};
-$('pullCloud').onclick=function(){if(!store.sync.key||!store.sync.bin)return showToast('请先填写并保存同步配置');if(!confirm('用云端数据覆盖本机数据？本机未上传的修改会丢失。'))return;$('syncMsg').textContent='⏳ 正在拉取…';fetch('https://api.jsonbin.io/v3/b/'+store.sync.bin+'/latest',{headers:{'X-Master-Key':store.sync.key}}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(function(j){var rec=(j&&j.record!==undefined)?j.record:j;for(var k in blank()){if(!(k in rec))rec[k]=blank()[k];}store=rec;save();renderView();$('syncMsg').textContent='✅ 已从云端恢复';}).catch(function(err){$('syncMsg').textContent='❌ 拉取失败：'+err.message;});};
-$('clearAll').onclick=function(){if(!confirm('确定清空全部数据？此操作不可恢复！'))return;if(!confirm('再确认一次：真的要清空吗？'))return;store=blank();save();renderView();$('mask').classList.remove('on');showToast('已清空');};
-renderView();
-var wk=dkey(mondayOf(new Date()));
-if(store.lastWeek!==wk){store.lastWeek=wk;save();openWeekly();}
-})();
-</script>
-</body>
-</html>
+$('pullCloud').onclick=function(){if(!store.sync.key||!store.sync.bin)return showToast('请先填写并保存同步配置');if(!confirm('用云端数据覆盖本机数据？本机未上传的修改会丢失。'))return;$('syncMsg').textContent='⏳ 正在拉取…';fetch('https://api.jsonbin.io/v3/b/'+store.sync.bin+'/latest',{headers:{'X-Master-Key':store.sync.key}}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(function(j){var rec=(j&&j.record!==undefined)?j.record:j;for(var k in blank()){if(!(k in rec))rec[k]=blank()[k];}
+if(rec.fitPlan||rec.fitChecks){(rec.fitPlan||[]).forEach(function(it){if(it&&it.name&&rec.fitLib.indexOf(it.name)<0)rec.fitLib.push(it.name);});Object.keys(rec.fitChecks||{}).forEach(function(d){var day=rec.fitDays[d]||{plan:[],meals:[]};(rec.fitPlan||[]).forEach(function(it){if(!it)return;day.plan.push({id:uid(),name:it.name,done:!!rec.fitChecks[d][it.id],notes:[]});});(rec.fitMeals||[]).forEach(function(mt){if(!mt)return;day.meals.push({id:uid(),name:mt.name,text:''});});if(day.plan.length||day.meals.length)rec.fitDays[d]=day;});delete rec.fitPlan;delete rec.fitMeals;delete rec.fitChecks;delete rec.fitNotes;}
+store=rec;save();renderView();$('syncMsg').textCo
