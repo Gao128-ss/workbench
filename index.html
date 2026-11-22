@@ -458,7 +458,7 @@ function renderIdea(){recReset();var arr=store.ideas.slice().sort(function(a,b){
 arr.forEach(function(x){html+='<div class="idea-it"><div class="idea-head"><span class="idea-date">💡 '+disp(x.date)+' · '+x.time+(x.audio?'<span class="idea-audio-tag">🎙 有录音</span>':'')+'</span><button class="del" data-act="delIdea" data-id="'+x.id+'">✕</button></div>'+(x.text?'<div class="idea-txt">'+esc(x.text)+'</div>':'')+(x.audio?'<audio controls src="'+x.audio+'"></audio>':'')+'</div>';});
 $('ideaList').innerHTML=html||'<div class="empty">💡 还没有灵感<br>想到什么随时记一条，别让它溜走</div>';}
 /* ---- 健身：月视图 + 按天训练/三餐 ---- */
-function getDay(d){if(!store.fitDays[d])store.fitDays[d]={plan:[],meals:DEFMEALS.map(function(m){return {id:uid(),name:m,text:''};});}
+function getDay(d){if(!store.fitDays[d])store.fitDays[d]={plan:[],meals:DEFMEALS.map(function(m){return {id:uid(),name:m,text:''};})};
 if(!store.fitDays[d].plan)store.fitDays[d].plan=[];if(!store.fitDays[d].meals)store.fitDays[d].meals=[];return store.fitDays[d];}
 $('fPrev').onclick=function(){state.fitCalM--;if(state.fitCalM<0){state.fitCalM=11;state.fitCalY--;}renderFitCal();};
 $('fNext').onclick=function(){state.fitCalM++;if(state.fitCalM>11){state.fitCalM=0;state.fitCalY++;}renderFitCal();};
@@ -538,4 +538,12 @@ $('saveSync').onclick=function(){store.sync.key=$('syncKey').value.trim();store.
 $('pushCloud').onclick=function(){if(!store.sync.key||!store.sync.bin)return showToast('请先填写并保存同步配置');$('syncMsg').textContent='⏳ 正在上传…';fetch('https://api.jsonbin.io/v3/b/'+store.sync.bin,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':store.sync.key,'X-Bin-Versioning':'false'},body:JSON.stringify(store)}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(function(){$('syncMsg').textContent='✅ 已上传到云端（'+new Date().toLocaleTimeString()+'）';}).catch(function(err){$('syncMsg').textContent='❌ 上传失败：'+err.message+'（数据可能太大或密钥有误）';});};
 $('pullCloud').onclick=function(){if(!store.sync.key||!store.sync.bin)return showToast('请先填写并保存同步配置');if(!confirm('用云端数据覆盖本机数据？本机未上传的修改会丢失。'))return;$('syncMsg').textContent='⏳ 正在拉取…';fetch('https://api.jsonbin.io/v3/b/'+store.sync.bin+'/latest',{headers:{'X-Master-Key':store.sync.key}}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(function(j){var rec=(j&&j.record!==undefined)?j.record:j;for(var k in blank()){if(!(k in rec))rec[k]=blank()[k];}
 if(rec.fitPlan||rec.fitChecks){(rec.fitPlan||[]).forEach(function(it){if(it&&it.name&&rec.fitLib.indexOf(it.name)<0)rec.fitLib.push(it.name);});Object.keys(rec.fitChecks||{}).forEach(function(d){var day=rec.fitDays[d]||{plan:[],meals:[]};(rec.fitPlan||[]).forEach(function(it){if(!it)return;day.plan.push({id:uid(),name:it.name,done:!!rec.fitChecks[d][it.id],notes:[]});});(rec.fitMeals||[]).forEach(function(mt){if(!mt)return;day.meals.push({id:uid(),name:mt.name,text:''});});if(day.plan.length||day.meals.length)rec.fitDays[d]=day;});delete rec.fitPlan;delete rec.fitMeals;delete rec.fitChecks;delete rec.fitNotes;}
-store=rec;save();renderView();$('syncMsg').textCo
+store=rec;save();renderView();$('syncMsg').textContent='✅ 已从云端恢复';}).catch(function(err){$('syncMsg').textContent='❌ 拉取失败：'+err.message;});};
+$('clearAll').onclick=function(){if(!confirm('确定清空全部数据？此操作不可恢复！'))return;if(!confirm('再确认一次：真的要清空吗？'))return;store=blank();save();renderView();$('mask').classList.remove('on');showToast('已清空');};
+renderView();
+var wk=dkey(mondayOf(new Date()));
+if(store.lastWeek!==wk){store.lastWeek=wk;save();openWeekly();}
+})();
+</script>
+</body>
+</html>
